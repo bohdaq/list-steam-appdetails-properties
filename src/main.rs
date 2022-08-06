@@ -1,3 +1,4 @@
+use std::collections::HashSet;
 use serde_json::Value;
 use std::fs::read_to_string;
 use steam_webapi_rust_sdk::store_steampowered_com::appdetails::get_resource_filepath;
@@ -40,10 +41,16 @@ fn parse_json(cached_api_response: String, app_id: i64) {
     let mut app_details : Value = app_details_wrapped["data"].take();
     let mut indendation = 0;
     let mut path = "";
-    parse_json_object(&app_details, indendation, path);
+    let mut app_details_structure : HashSet<String> = HashSet::new();
+    parse_json_object(&app_details, indendation, path, &mut app_details_structure);
+    println!("\n\n\n");
+
+    for path in app_details_structure {
+        println!("{}", path)
+    }
 }
 
-fn parse_json_object(json: &Value, mut indentation: i64, mut path: &str) {
+fn parse_json_object(json: &Value, mut indentation: i64, mut path: &str, app_details_structure: &mut HashSet<String>) {
     for (key, value) in json.as_object().unwrap() {
         let literal = " ".repeat(indentation as usize);
 
@@ -60,7 +67,7 @@ fn parse_json_object(json: &Value, mut indentation: i64, mut path: &str) {
         } else if is_object {
             property_type = "Object";
         } else if is_array {
-            property_type = "Array";
+            property_type = "[0]";
         } else if is_i64 {
             property_type = "i64";
         } else if is_f64 {
@@ -68,16 +75,17 @@ fn parse_json_object(json: &Value, mut indentation: i64, mut path: &str) {
         } else if is_bool {
             property_type = "bool"
         }
-        let new_path_and_type = format!("{}[{}]", key, property_type);
+        let new_path_and_type = format!("{}<{}>", key, property_type);
         let mut total_path = [&path, new_path_and_type.as_str()].join("");
         println!("{}{}", &literal, &new_path_and_type);
-        println!("{}{}", &literal, &total_path);
+        let clone : String = total_path.clone();
+        app_details_structure.insert(clone);
 
 
 
         if value.is_object() {
             indentation = indentation + 1;
-            parse_json_object(value, indentation, &total_path);
+            parse_json_object(value, indentation, &total_path, app_details_structure);
             indentation = indentation - 1;
         }
 
@@ -90,7 +98,7 @@ fn parse_json_object(json: &Value, mut indentation: i64, mut path: &str) {
 
                 if first_item.is_object() {
                     indentation = indentation + 1;
-                    parse_json_object(first_item, indentation, &total_path);
+                    parse_json_object(first_item, indentation, &total_path, app_details_structure);
                     indentation = indentation - 1;
                 }
 
