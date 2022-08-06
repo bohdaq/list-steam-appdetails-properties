@@ -8,26 +8,60 @@ fn main() {
 
     let app_id = 730;
 
-    let resource_file_path = get_resource_filepath(app_id);
-    println!("{}", resource_file_path);
+    let mut app_details_structure : HashSet<String> = HashSet::new();
 
+    let boxed_processing_result = process_app_details(app_id);
+    if boxed_processing_result.is_err() {
+        println!("{}", boxed_processing_result.err().unwrap());
+    } else {
+        let resulting_set = boxed_processing_result.unwrap();
+        app_details_structure.extend(resulting_set);
+    }
+
+
+    let app_id = 570;
+    let boxed_processing_result = process_app_details(app_id);
+    if boxed_processing_result.is_err() {
+        println!("{}", boxed_processing_result.err().unwrap());
+    } else {
+        let resulting_set = boxed_processing_result.unwrap();
+        app_details_structure.extend(resulting_set);
+    }
+
+    println!("\n!!!\n!!!\n");
+
+    let mut as_vector : Vec<&String> = app_details_structure.iter().collect();
+    as_vector.sort_by(|a, b| b.cmp(a));
+
+    for path in &as_vector {
+        println!("{}", path)
+    }
+    println!("total properties count: {}", as_vector.len());
+}
+
+fn process_app_details(app_id: i64) -> Result<HashSet<String>, String> {
+    let resource_file_path = get_resource_filepath(app_id);
     let boxed_read = read_to_string(resource_file_path);
     let is_readable = boxed_read.is_ok();
     if is_readable {
         let cached_api_response = boxed_read.unwrap();
         println!("{}", cached_api_response);
-        parse_json(cached_api_response, app_id);
+        return parse_json(cached_api_response, app_id);
     } else {
-        println!("unable to read cached resource");
+        let error = "unable to read cached resource";
+        println!("{}", &error);
+        return Err(error.to_string())
     }
-
-
 }
 
-fn parse_json(cached_api_response: String, app_id: i64) {
+fn parse_json(cached_api_response: String, app_id: i64) -> Result<HashSet<String>, String> {
+    let mut app_details_structure : HashSet<String> = HashSet::new();
+
     let boxed_initial_parse = serde_json::from_str(&cached_api_response);
     if boxed_initial_parse.is_err() {
-        return println!("{}", boxed_initial_parse.err().unwrap().to_string());
+        let error = boxed_initial_parse.err().unwrap().to_string();
+        println!("{}", &error);
+        return Err(error);
     }
     let mut json: Value = boxed_initial_parse.unwrap();
 
@@ -41,7 +75,6 @@ fn parse_json(cached_api_response: String, app_id: i64) {
     let mut app_details : Value = app_details_wrapped["data"].take();
     let mut indendation = 0;
     let mut path = "";
-    let mut app_details_structure : HashSet<String> = HashSet::new();
     parse_json_object(&app_details, indendation, path, &mut app_details_structure);
     println!("\n\n\n");
 
@@ -52,6 +85,8 @@ fn parse_json(cached_api_response: String, app_id: i64) {
         println!("{}", path)
     }
     println!("total properties count: {}", as_vector.len());
+
+    Ok(app_details_structure)
 
 }
 
