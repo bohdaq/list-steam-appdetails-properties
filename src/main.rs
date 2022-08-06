@@ -1,6 +1,7 @@
 use std::collections::HashSet;
 use serde_json::Value;
-use std::fs::read_to_string;
+use std::fs::{File, OpenOptions, read_to_string};
+use std::io::Write;
 use std::path::Path;
 use steam_webapi_rust_sdk::store_steampowered_com::appdetails::get_resource_filepath;
 use steam_webapi_rust_sdk::util::get_cache_dir_path;
@@ -34,8 +35,33 @@ fn main() {
 
     println!("\n!!!\n!!!\n");
 
+    let app_details_scheme_filepath = [
+        get_cache_dir_path(),
+        "/".to_string(),
+        "steampowered".to_string(),
+        "/".to_string(),
+        "appdetails_scheme.json".to_string()
+    ].join("");
+    let file_exists = Path::new(&app_details_scheme_filepath.as_str()).is_file();
+    if !file_exists {
+        File::create(&app_details_scheme_filepath).unwrap();
+    }
+
     let mut as_vector : Vec<&String> = app_details_structure.iter().collect();
     as_vector.sort_by(|a, b| b.cmp(a));
+
+    let serialized_list = serde_json::to_string(&as_vector).unwrap();
+
+    let mut file = OpenOptions::new()
+        .read(true)
+        .write(true)
+        .create(true)
+        .truncate(true)
+        .open(&app_details_scheme_filepath)
+        .unwrap();
+    file.write_all(serialized_list.as_ref()).unwrap();
+
+
 
     for path in &as_vector {
         println!("{}", path)
