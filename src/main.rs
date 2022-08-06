@@ -1,18 +1,31 @@
 use std::collections::HashSet;
 use serde_json::Value;
 use std::fs::read_to_string;
+use std::path::Path;
 use steam_webapi_rust_sdk::store_steampowered_com::appdetails::get_resource_filepath;
+use steam_webapi_rust_sdk::util::get_cache_dir_path;
 
 fn main() {
     println!("Hello, world!");
 
-    let app_id_list = [730 as i64, 570 ];
+    let mut app_id_list: Vec<i64> = vec![730 as i64, 570 ];
     let mut app_details_structure : HashSet<String> = HashSet::new();
+
+
+    let already_processed_app_id_list_path = [get_cache_dir_path(), "/".to_string(), "processed_app_id_list.json".to_string()].join("");
+    let file_exists = Path::new(already_processed_app_id_list_path.as_str()).is_file();
+    if file_exists {
+        let serialized_string = read_to_string(&already_processed_app_id_list_path).unwrap();
+        if serialized_string.len() > 0 {
+            app_id_list = serde_json::from_str(serialized_string.as_str()).unwrap();
+        }
+    }
+
 
     for app_id in app_id_list.iter() {
         let boxed_processing_result = process_app_details(app_id.to_owned());
         if boxed_processing_result.is_err() {
-            println!("{}", boxed_processing_result.err().unwrap());
+            //println!("{}", boxed_processing_result.err().unwrap());
         } else {
             let resulting_set = boxed_processing_result.unwrap();
             app_details_structure.extend(resulting_set);
@@ -36,11 +49,11 @@ fn process_app_details(app_id: i64) -> Result<HashSet<String>, String> {
     let is_readable = boxed_read.is_ok();
     if is_readable {
         let cached_api_response = boxed_read.unwrap();
-        println!("{}", cached_api_response);
+        //println!("{}", cached_api_response);
         return parse_json(cached_api_response, app_id);
     } else {
         let error = "unable to read cached resource";
-        println!("{}", &error);
+        //println!("{}", &error);
         return Err(error.to_string())
     }
 }
@@ -67,15 +80,15 @@ fn parse_json(cached_api_response: String, app_id: i64) -> Result<HashSet<String
     let mut indendation = 0;
     let mut path = "";
     parse_json_object(&app_details, indendation, path, &mut app_details_structure);
-    println!("\n\n\n");
+    //println!("\n\n\n");
 
     let mut as_vector : Vec<&String> = app_details_structure.iter().collect();
     as_vector.sort_by(|a, b| b.cmp(a));
 
     for path in &as_vector {
-        println!("{}", path)
+        //println!("{}", path)
     }
-    println!("total properties count: {}", as_vector.len());
+    //println!("total properties count: {}", as_vector.len());
 
     Ok(app_details_structure)
 
@@ -108,7 +121,7 @@ fn parse_json_object(json: &Value, mut indentation: i64, mut path: &str, app_det
         }
         let new_path_and_type = format!("{}<{}>", key, property_type);
         let mut total_path = [&path, new_path_and_type.as_str()].join("");
-        println!("{}{}", &literal, &new_path_and_type);
+        //println!("{}{}", &literal, &new_path_and_type);
         let clone : String = total_path.clone();
         app_details_structure.insert(clone);
 
@@ -122,7 +135,7 @@ fn parse_json_object(json: &Value, mut indentation: i64, mut path: &str, app_det
 
         if value.is_array() {
             let as_array = value.as_array().unwrap();
-            println!("{} array length: {}, showing first item", &literal, as_array.len());
+            //println!("{} array length: {}, showing first item", &literal, as_array.len());
 
             if as_array.len() > 0 {
                 let first_item = as_array.get(0).unwrap();
