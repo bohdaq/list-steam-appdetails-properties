@@ -39,10 +39,11 @@ fn parse_json(cached_api_response: String, app_id: i64) {
 
     let mut app_details : Value = app_details_wrapped["data"].take();
     let mut indendation = 0;
-    parse_json_object(&app_details, indendation)
+    let mut path = "";
+    parse_json_object(&app_details, indendation, path);
 }
 
-fn parse_json_object(json: &Value, mut indentation: i64) {
+fn parse_json_object(json: &Value, mut indentation: i64, mut path: &str) {
     for (key, value) in json.as_object().unwrap() {
         let literal = " ".repeat(indentation as usize);
 
@@ -67,14 +68,16 @@ fn parse_json_object(json: &Value, mut indentation: i64) {
         } else if is_bool {
             property_type = "bool"
         }
-
-        println!("{}{}[{}]", &literal, key, property_type);
+        let new_path_and_type = format!("{}[{}]", key, property_type);
+        let mut total_path = [&path, new_path_and_type.as_str()].join("");
+        println!("{}{}", &literal, &new_path_and_type);
+        println!("{}{}", &literal, &total_path);
 
 
 
         if value.is_object() {
             indentation = indentation + 1;
-            parse_json_object(value, indentation);
+            parse_json_object(value, indentation, &total_path);
             indentation = indentation - 1;
         }
 
@@ -87,7 +90,7 @@ fn parse_json_object(json: &Value, mut indentation: i64) {
 
                 if first_item.is_object() {
                     indentation = indentation + 1;
-                    parse_json_object(first_item, indentation);
+                    parse_json_object(first_item, indentation, &total_path);
                     indentation = indentation - 1;
                 }
 
