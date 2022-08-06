@@ -51,6 +51,7 @@ checksum = "505e71a4706fa491e9b1b55f51b95d4037d0821ee40131190475f692b35b009b"
 name = "list-steam-appdetails-properties"
 version = "0.1.0"
 dependencies = [
+ "serde_json",
  "steam-webapi-rust-sdk",
 ]
 

@@ -7,3 +7,4 @@ edition = "2021"
 
 [dependencies]
 steam-webapi-rust-sdk = "0.0.2"
+serde_json = { version="1.0.82" }
