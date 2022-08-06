@@ -125,7 +125,7 @@ fn parse_json_object(json: &Value, mut indentation: i64, mut path: &str, app_det
         let clone : String = total_path.clone();
 
         let has_type = is_string || is_object || is_array || is_i64 || is_f64 || is_bool;
-        if has_type {
+        if has_type && !is_array {
             app_details_structure.insert(clone);
         }
 
