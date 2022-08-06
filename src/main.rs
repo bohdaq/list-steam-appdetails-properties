@@ -45,9 +45,14 @@ fn parse_json(cached_api_response: String, app_id: i64) {
     parse_json_object(&app_details, indendation, path, &mut app_details_structure);
     println!("\n\n\n");
 
-    for path in app_details_structure {
+    let mut as_vector : Vec<&String> = app_details_structure.iter().collect();
+    as_vector.sort_by(|a, b| b.cmp(a));
+
+    for path in as_vector {
         println!("{}", path)
     }
+    println!("total properties count: {}", as_vector.len());
+
 }
 
 fn parse_json_object(json: &Value, mut indentation: i64, mut path: &str, app_details_structure: &mut HashSet<String>) {
