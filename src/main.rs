@@ -45,12 +45,54 @@ fn parse_json(cached_api_response: String, app_id: i64) {
 fn parse_json_object(json: &Value, mut indentation: i64) {
     for (key, value) in json.as_object().unwrap() {
         let literal = " ".repeat(indentation as usize);
-        println!("{}{}", literal, key);
+
+        let mut property_type = "";
+        let is_object = value.is_object();
+        let is_array = value.is_array();
+        let is_i64 = value.is_i64();
+        let is_f64 = value.is_f64();
+        let is_bool = value.is_boolean();
+        let is_string = value.is_string();
+
+        if is_string {
+            property_type = "String";
+        } else if is_object {
+            property_type = "Object";
+        } else if is_array {
+            property_type = "Array";
+        } else if is_i64 {
+            property_type = "i64";
+        } else if is_f64 {
+            property_type = "f64";
+        } else if is_bool {
+            property_type = "bool"
+        }
+
+        println!("{}{}[{}]", &literal, key, property_type);
+
+
 
         if value.is_object() {
             indentation = indentation + 1;
             parse_json_object(value, indentation);
             indentation = indentation - 1;
+        }
+
+        if value.is_array() {
+            let as_array = value.as_array().unwrap();
+            println!("{} array length: {}, showing first item", &literal, as_array.len());
+
+            if as_array.len() > 0 {
+                let first_item = as_array.get(0).unwrap();
+
+                if first_item.is_object() {
+                    indentation = indentation + 1;
+                    parse_json_object(first_item, indentation);
+                    indentation = indentation - 1;
+                }
+
+            }
+
         }
 
     }
