@@ -6,26 +6,17 @@ use steam_webapi_rust_sdk::store_steampowered_com::appdetails::get_resource_file
 fn main() {
     println!("Hello, world!");
 
-    let app_id = 730;
-
+    let app_id_list = [730 as i64, 570 ];
     let mut app_details_structure : HashSet<String> = HashSet::new();
 
-    let boxed_processing_result = process_app_details(app_id);
-    if boxed_processing_result.is_err() {
-        println!("{}", boxed_processing_result.err().unwrap());
-    } else {
-        let resulting_set = boxed_processing_result.unwrap();
-        app_details_structure.extend(resulting_set);
-    }
-
-
-    let app_id = 570;
-    let boxed_processing_result = process_app_details(app_id);
-    if boxed_processing_result.is_err() {
-        println!("{}", boxed_processing_result.err().unwrap());
-    } else {
-        let resulting_set = boxed_processing_result.unwrap();
-        app_details_structure.extend(resulting_set);
+    for app_id in app_id_list.iter() {
+        let boxed_processing_result = process_app_details(app_id.to_owned());
+        if boxed_processing_result.is_err() {
+            println!("{}", boxed_processing_result.err().unwrap());
+        } else {
+            let resulting_set = boxed_processing_result.unwrap();
+            app_details_structure.extend(resulting_set);
+        }
     }
 
     println!("\n!!!\n!!!\n");
