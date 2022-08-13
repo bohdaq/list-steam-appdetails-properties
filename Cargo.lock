@@ -183,9 +183,9 @@ checksum = "6e63cff320ae2c57904679ba7cb63280a3dc4613885beafb148ee7bf9aa9042d"
 
 [[package]]
 name = "steam-webapi-rust-sdk"
-version = "0.0.2"
+version = "0.0.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "906b5eb2be741d9a1af345d0b680db8ac523fde6d1af4a36cb305c7ff4e9b4f9"
+checksum = "e9b9930615d60534e2ca95e815ea18646c214d76cd561294af87f1802f06b368"
 dependencies = [
  "minreq",
  "serde",
