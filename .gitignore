@@ -1,3 +1,4 @@
 steam-webapi-cache
 .idea
 /target
+Cargo.lock
